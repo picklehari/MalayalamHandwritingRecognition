@@ -78,7 +78,11 @@ def padding_resizing_image(img):
 def segmentation(filename):
     img = cv2.imread(os.path.join(
         UPLOAD_FOLDER, filename), 0)
-
+    
+    width = 1280
+    height = int(img.shape[0] * (1280 / img.shape[1]))
+    img = cv2.resize(img, (width, height))
+    
     # Otsu's thresholding after Gaussian filtering
     blur = cv2.GaussianBlur(img, (5, 5), 0)
     ret3, thresh = cv2.threshold(
@@ -93,7 +97,7 @@ def segmentation(filename):
         new = padding_resizing_image(new)
         try:
             plt.imsave(dst, new, cmap=cm.gray)
-            # png2svg(str(dst+">"+os.path.join(OUTPUT_FOLDER, i+".svg")))
+            print(png2svg.png_to_svg(dst))
         except:
             print("some error", file=sys.stdout)
         finally:
