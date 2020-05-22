@@ -90,18 +90,19 @@ def segmentation(filename):
 
     num_labels, labels_im = cv2.connectedComponents(thresh)
 
+    dest = os.mkdir(os.path.join(OUTPUT_FOLDER, filename.split(".")[0]))
+
     for i in range(1, num_labels):
         new, nr_objects = ndimage.label(labels_im == i)
-        dst = os.path.join(OUTPUT_FOLDER, str(i)+".png")
+        dst = os.path.join(OUTPUT_FOLDER, filename.split(".")[0], str(i)+".png")
         new = clipping_image(new)
         new = padding_resizing_image(new)
         try:
             plt.imsave(dst, new, cmap=cm.gray)
-            print(png2svg.png_to_svg(dst))
         except:
-            print("some error", file=sys.stdout)
+            pass
         finally:
-            print("some error", file=sys.stdout)
+            pass
         print("completed", file=sys.stdout)
     return "1"
 
@@ -133,12 +134,12 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             print(filename, file=sys.stdout)
-            x = segmentation(filename)
+            x = segmentation(filename) # image segmentation
     if x == "1":
-        alpha = {}
-        for f in os.listdir(OUTPUT_FOLDER):
+        alpha = {} # dictionary with predicted alphabet and image name
+        for f in os.listdir(os.path.join(OUTPUT_FOLDER, filename.split(".")[0])):
             alpha[str(f)]=str(predict_alphabets(os.path.join(
-                OUTPUT_FOLDER, f)))
+                OUTPUT_FOLDER, filename.split(".")[0], f)))
         print(alpha)
     return "completed successfully"
 

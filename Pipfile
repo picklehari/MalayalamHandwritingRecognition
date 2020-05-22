@@ -7,6 +7,11 @@ verify_ssl = true
 autopep8 = "*"
 
 [packages]
+opencv-python = "*"
+flask = "*"
+scipy = "*"
+fastai = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"
