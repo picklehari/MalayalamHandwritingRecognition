@@ -36,12 +36,12 @@ def set_tag():
 def predict_alphabets(image_path):
     print(image_path, file=sys.stdout)
     defaults.device = torch.device("cpu")
-    learn = load_learner(path='.', file="MalHand_18.pkl")
+    learn = load_learner(path='.', file="resnet_18_non-pre_trained.pkl")
     # image_path = Path(image_path)
 
     img = open_image(image_path)
     # alphabets = set_tag()
-    alphabets = ['്', 'ാ', 'ി', 'ീ', 'ു', 'ൂ', 'െ', 'ൃ', 'െ', 'ൌ', 'ം', 'അ', 'ആ', 'ഇ', 'ഉ', 'ഋ', 'എ', 'ഏ', 'ഒ', 'ക', 'ഖ', 'ഗ', 'ഘ', 'ങ', 'ച', 'ഛ', 'ജ', 'ഝ', 'ഞ', 'ട', 'ഠ', 'ഢ', 'ഡ', 'ണ', 'ത', 'ഫ', 'ദ', 'ധ', 'ന', 'പ', 'ഫ', 'ബ', 'ഭ', 'മ', 'യ', 'ര',
+    alphabets = ['്', 'ാ', 'ി', 'ീ', 'ു', 'ൂ', 'െ', 'ൃ', 'െ', 'ൌ', 'ം', 'അ', 'ആ', 'ഇ', 'ഉ', 'ഋ', 'എ', 'ഏ', 'ഒ', 'ക', 'ഖ', 'ഗ', 'ഘ', 'ങ', 'ച', 'ഛ', 'ജ', 'ഝ', 'ഞ', 'ട', 'ഠ', 'ഡ', 'ഢ', 'ണ', 'ത', 'ഫ', 'ദ', 'ധ', 'ന', 'പ', 'ഫ', 'ബ', 'ഭ', 'മ', 'യ', 'ര',
                  'റ', 'ല', 'ള', 'ഴ', 'വ', 'ശ', 'ഷ', 'സ', 'ഹ', 'ൺ', 'ൻ', 'ർ', 'ൽ', 'ൾ', 'ക്ക', 'ക്ഷ', 'ങ്ക', 'ങ്ങ', 'ച്ച', 'ഞ്ച', 'ഞ്ഞ', 'ട്ട', 'ണ്ട', 'ണ്ണ', 'ത്ത', 'ദ്ധ', 'ന്ത', 'ന്ദ', 'ന്ന', 'പ്പ', 'മ്പ', 'മ്മ', 'യ്യ', 'ല്ല', 'ള്ള', 'വ്വ', '്യ', '്ര', '്വ']
     pred_class, pred_idx, outputs = learn.predict(img)
     index = int(str(pred_class)) - 1
