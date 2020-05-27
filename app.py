@@ -15,7 +15,8 @@ from fastai.metrics import accuracy
 import png2svg
 
 UPLOAD_FOLDER = './uploads'
-OUTPUT_FOLDER = './output'
+OUTPUT_FOLDER_PNG = './output/png'
+OUTPUT_FOLDER_SVG = './output/svg'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
@@ -90,11 +91,12 @@ def segmentation(filename):
 
     num_labels, labels_im = cv2.connectedComponents(thresh)
 
-    dest = os.mkdir(os.path.join(OUTPUT_FOLDER, filename.split(".")[0]))
+    dest = os.mkdir(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0]))
+    dest_svg = os.mkdir(os.path.join(OUTPUT_FOLDER_SVG, filename.split(".")[0]))
 
     for i in range(1, num_labels):
         new, nr_objects = ndimage.label(labels_im == i)
-        dst = os.path.join(OUTPUT_FOLDER, filename.split(".")[0], str(i)+".png")
+        dst = os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0], str(i)+".png")
         new = clipping_image(new)
         new = padding_resizing_image(new)
         try:
@@ -137,9 +139,10 @@ def upload_file():
             x = segmentation(filename) # image segmentation
     if x == "1":
         alpha = {} # dictionary with predicted alphabet and image name
-        for f in os.listdir(os.path.join(OUTPUT_FOLDER, filename.split(".")[0])):
+        for f in os.listdir(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0])):
             alpha[str(f)]=str(predict_alphabets(os.path.join(
-                OUTPUT_FOLDER, filename.split(".")[0], f)))
+                OUTPUT_FOLDER_PNG, filename.split(".")[0], f)))
+            subprocess.call(["convert", os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0], f), "-negate", os.path.join(OUTPUT_FOLDER_SVG, filename.split(".")[0], f.split(".")[0]+".svg")])
         print(alpha)
     return "completed successfully"
 
