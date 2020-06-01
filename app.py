@@ -13,10 +13,14 @@ from fastai import *
 from fastai.vision import *
 from fastai.metrics import accuracy
 import png2svg
+import json
 
 UPLOAD_FOLDER = './uploads'
 OUTPUT_FOLDER_PNG = './output/png'
+OUTPUT_FOLDER_PNG_x64 = './output/png_x64'
 OUTPUT_FOLDER_SVG = './output/svg'
+OUTPUT_FOLDER_FONT = './output/fonts'
+OUTPUT_FOLDER_METADATA = './output/font_metadata'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
@@ -120,10 +124,10 @@ def clipping_image(new):
     return imgcrop, [x, xh, y, yw]
 
 
-def padding_resizing_image(img):
+def padding_resizing_image(img, reduce_size):
     img = cv2.copyMakeBorder(img, 2, 2, 0, 0, cv2.BORDER_CONSTANT) # add 2px padding to image
     try:
-        img = cv2.resize(np.uint8(img), (32, 32)) # resize the image to 32*32
+        img = cv2.resize(np.uint8(img), (reduce_size, reduce_size)) # resize the image to 32*32
     except:
         return img
     finally:
@@ -131,7 +135,7 @@ def padding_resizing_image(img):
 
 def segmentation(img, sequence, origimg=None, wordNo=None, filename=None):
     if(sequence == "word"): # resize to find the words
-        width = 640
+        width = 940
         height = int(img.shape[0] * (width / img.shape[1]))
         sigma = 18
     elif(sequence == "character"): # resize to find the characters
@@ -173,10 +177,13 @@ def segmentation(img, sequence, origimg=None, wordNo=None, filename=None):
         for box in label_box:
             ch_img, nr_objects = ndimage.label(labels_im == box[0])
             ch_img, new_coord = clipping_image(ch_img)
-            cropped_image = padding_resizing_image(ch_img)
+            cropped_image = padding_resizing_image(ch_img, 32)
+            cropped_image_x64 = padding_resizing_image(ch_img, 64)
             try:
                 dst = os.path.join(OUTPUT_FOLDER_PNG, filename, str(wordNo)+"_"+str(chNo)+".png")
+                dst_x64 = os.path.join(OUTPUT_FOLDER_PNG_x64, filename, str(wordNo)+"_"+str(chNo)+".png")
                 plt.imsave(dst, cropped_image, cmap=cm.gray)
+                plt.imsave(dst_x64, cropped_image_x64, cmap=cm.gray)
             except:
                 pass
             finally:
@@ -232,23 +239,45 @@ def upload_file():
             print(filename, file=sys.stdout)
             os.mkdir(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0]))
             os.mkdir(os.path.join(OUTPUT_FOLDER_SVG, filename.split(".")[0]))
+            os.mkdir(os.path.join(OUTPUT_FOLDER_PNG_x64, filename.split(".")[0]))
             img = cv2.cvtColor(cv2.imread(os.path.join(UPLOAD_FOLDER, filename)), cv2.COLOR_BGR2RGB) # input image
             x, wordNo = img_to_seg(img, filename)
 
     if x == "1":
+        metadata = {
+                        "props": {
+                            "ascent": 800,
+                            "descent": 200,
+                            "em": 1000,
+                            "family": "Example"
+                        },
+                        "input": "",
+                        "output": [""],
+                        "glyphs": {}
+                    }
+        metadata["input"] = str("../svg/" + filename.split(".")[0])
+        metadata["output"][0] = "../fonts/" + filename.split(".")[0]+".ttf"
         alpha = {} # dictionary with predicted alphabet and image name
+        char_filenames = {}
         for i in range(wordNo):
             alpha[str(i)] = {}
         for f in os.listdir(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0])):
-            alpha[str(f.split("_")[0])][str(f.split("_")[1].split(".")[0])] = str(predict_alphabets(os.path.join(
-                OUTPUT_FOLDER_PNG, filename.split(".")[0], f)))
-            subprocess.call(["convert", os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0], f), "-negate", os.path.join(OUTPUT_FOLDER_SVG, filename.split(".")[0], f.split(".")[0]+".svg")])
+            character = str(predict_alphabets(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0], f)))
+            alpha[str(f.split("_")[0])][str(f.split("_")[1].split(".")[0])] = character
+            char_filenames[str(character.encode("unicode_escape")).split("\\")[-1].split("\'")[0].replace('u0', '0x')] = f.split(".")[0] + ".svg"
+            subprocess.call(["convert", os.path.join(OUTPUT_FOLDER_PNG_x64, filename.split(".")[0], f), "-negate", os.path.join(OUTPUT_FOLDER_SVG, filename.split(".")[0], f.split(".")[0]+".svg")])
+        metadata["glyphs"] = char_filenames
+        print(metadata)
+        with open(os.path.join(OUTPUT_FOLDER_METADATA, filename.split(".")[0]+str(".json")), 'w') as fp:
+            json.dump(metadata, fp)
+        print(char_filenames)
         print(alpha)
         for word in range(0, len(alpha)):
             string = ""
             for ch in range(len(alpha[str(word)])):
                 string += alpha[str(word)][str(ch)]
             print(string)
+        subprocess.call(["./svgs2ttf", str(os.path.join(OUTPUT_FOLDER_METADATA, filename.split(".")[0]+".json"))])
     return "completed successfully"
 
 
