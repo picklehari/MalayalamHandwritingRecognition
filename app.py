@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for
+from flask import send_from_directory, send_file, flash
 from werkzeug.utils import secure_filename
 import cv2
 import numpy as np
@@ -12,7 +13,6 @@ import sys
 from fastai import *
 from fastai.vision import *
 from fastai.metrics import accuracy
-import png2svg
 import json
 
 UPLOAD_FOLDER = './uploads'
@@ -272,14 +272,22 @@ def upload_file():
             json.dump(metadata, fp)
         print(char_filenames)
         print(alpha)
+        string = ""
         for word in range(0, len(alpha)):
-            string = ""
             for ch in range(len(alpha[str(word)])):
                 string += alpha[str(word)][str(ch)]
-            print(string)
+            string += " "
+        print(string)
         subprocess.call(["./svgs2ttf", str(os.path.join(OUTPUT_FOLDER_METADATA, filename.split(".")[0]+".json"))])
-    return "completed successfully"
+    return render_template('result.html', messages={'string': string, 'image': str(filename), 'font': str(filename.split(".")[0])+'.ttf'})
 
+@app.route('/upload/<filename>')
+def uploads(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
+
+@app.route('/download/<filename>')
+def fonts(filename):
+    return send_file(os.path.join(OUTPUT_FOLDER_FONT, filename), as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True)
