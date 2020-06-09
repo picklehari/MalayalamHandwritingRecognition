@@ -27,31 +27,21 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-def set_tag():
-
-    alphabet = "്  ാ  ി  ീ  ു  ൂ  െ ൃ  െ  ൌ  ം അ ആ ഇ ഉ ഋ എ ഏ ഒ ക ഖ ഗ ഘ ങ ച ഛ ജ ഝ ഞ ട ഠ ഢ ഡ ണ ത ഫ ദ ധ ന പ ഫ ബ ഭ മ യ ര റ ല ള ഴ വ ശ ഷ സ ഹ ൺ ൻ ർ ൽ ൾ ക്ക ക്ഷ ങ്ക ങ്ങ ച്ച ഞ്ച ഞ്ഞ ട്ട ണ്ട ണ്ണ ത്ത ദ്ധ ന്ത ന്ദ ന്ന പ്പ മ്പ മ്മ യ്യ ല്ല ള്ള  ്യ   ്ര  ്വ"
-    alphabet = alphabet.split(" ")
-    alphabets = []
-    for x in alphabet:
-        if x != '':
-            alphabets.append(x)
-    return alphabets
-
-
 def predict_alphabets(image_path):
-    print(image_path, file=sys.stdout)
+    print(image_path)
     defaults.device = torch.device("cpu")
-    learn = load_learner(path='.', file="resnet_18_non-pre_trained.pkl")
-    # image_path = Path(image_path)
-
-    img = open_image(image_path)
-    # alphabets = set_tag()
     alphabets = ['്', 'ാ', 'ി', 'ീ', 'ു', 'ൂ', 'െ', 'ൃ', 'െ', 'ൌ', 'ം', 'അ', 'ആ', 'ഇ', 'ഉ', 'ഋ', 'എ', 'ഏ', 'ഒ', 'ക', 'ഖ', 'ഗ', 'ഘ', 'ങ', 'ച', 'ഛ', 'ജ', 'ഝ', 'ഞ', 'ട', 'ഠ', 'ഡ', 'ഢ', 'ണ', 'ത', 'ഫ', 'ദ', 'ധ', 'ന', 'പ', 'ഫ', 'ബ', 'ഭ', 'മ', 'യ', 'ര',
-                 'റ', 'ല', 'ള', 'ഴ', 'വ', 'ശ', 'ഷ', 'സ', 'ഹ', 'ൺ', 'ൻ', 'ർ', 'ൽ', 'ൾ', 'ക്ക', 'ക്ഷ', 'ങ്ക', 'ങ്ങ', 'ച്ച', 'ഞ്ച', 'ഞ്ഞ', 'ട്ട', 'ണ്ട', 'ണ്ണ', 'ത്ത', 'ദ്ധ', 'ന്ത', 'ന്ദ', 'ന്ന', 'പ്പ', 'മ്പ', 'മ്മ', 'യ്യ', 'ല്ല', 'ള്ള', 'വ്വ', '്യ', '്ര', '്വ']
-    pred_class, pred_idx, outputs = learn.predict(img)
-    index = int(str(pred_class)) - 1
-    print(alphabets[index], file=sys.stdout)
-    return alphabets[index]
+                    'റ', 'ല', 'ള', 'ഴ', 'വ', 'ശ', 'ഷ', 'സ', 'ഹ', 'ൺ', 'ൻ', 'ർ', 'ൽ', 'ൾ', 'ക്ക', 'ക്ഷ', 'ങ്ക', 'ങ്ങ', 'ച്ച', 'ഞ്ച', 'ഞ്ഞ', 'ട്ട', 'ണ്ട', 'ണ്ണ', 'ത്ത', 'ദ്ധ', 'ന്ത', 'ന്ദ', 'ന്ന', 'പ്പ', 'മ്പ', 'മ്മ', 'യ്യ', 'ല്ല', 'ള്ള', 'വ്വ', '്യ', '്ര', '്വ']
+    labels = {'12': 20, '54': 59, '79': 81, '26': 33, '83': 85, '11': 2, '18': 26, '55': 6, '42': 48, '14': 22, '36': 42, '63': 67, '57': 61, '60': 64, '70': 73, '31': 38, '65': 69, '0': 1, '73': 76, '51': 56, '17': 25, '84': 9, '1': 10, '64': 68, '38': 44, '47': 52, '23': 30, '68': 71, '80': 82, '75': 78, '30': 37, '72': 75, '82': 84, '43': 49, '62': 66, '49': 54, '77': 8, '5': 14, '34': 40, '16': 24, '25': 32, '29': 36, '39': 45, '21': 29, '74': 77, '46': 51, '44': 5, '27': 34, '35': 41, '37': 43, '58': 62, '9': 18, '4': 13, '41': 47, '40': 46, '81': 83, '67': 70, '59': 63, '69': 72, '52': 57, '78': 80, '15': 23, '33': 4, '24': 31, '22': 3, '76': 79, '10': 19, '3': 12, '50': 55, '28': 35, '6': 15, '19': 27, '2': 11, '7': 16, '53': 58, '32': 39, '61': 65, '8': 17, '13': 21, '45': 50, '71': 74, '44': 5, '48': 53, '56': 60, '20': 28}
+    ens = ["alexnet_non_pretrained_bs32.pkl", "resnet_18_non-pre_trained.pkl"]
+    ens_test_preds = []
+    for mod in ens:
+        learn = load_learner(path='.', file=mod)
+        img = open_image(image_path)
+        pred_class, pred_idx, outputs = learn.predict(img)
+        ens_test_preds.append(np.array(outputs))
+    ens_preds = np.mean(ens_test_preds, axis=0)
+    return (alphabets[int(labels[str(np.argmax(ens_preds))]) - 1])
 
 def _edge_detect(im):
     return np.max(np.array([_sobel_detect(im[:,:, 0]),_sobel_detect(im[:,:, 1]),_sobel_detect(im[:,:, 2])]), axis=0)
