@@ -250,13 +250,19 @@ def upload_file():
         metadata["output"][0] = "../fonts/" + filename.split(".")[0]+".ttf"
         alpha = {} # dictionary with predicted alphabet and image name
         char_filenames = {}
+        hybrid = ['ക്ക', 'ക്ഷ', 'ങ്ക', 'ങ്ങ', 'ച്ച', 'ഞ്ച', 'ഞ്ഞ', 'ട്ട', 'ണ്ട', 'ണ്ണ', 'ത്ത', 'ദ്ധ', 'ന്ത', 'ന്ദ', 'ന്ന', 'പ്പ', 'മ്പ', 'മ്മ', 'യ്യ', 'ല്ല', 'ള്ള', 'വ്വ', '്യ', '്ര', '്വ']
+        hybrid_dict = {'ക്ക': '0x1000c', 'ക്ഷ': '0x10030', 'ങ്ക': '0x10074', 'ങ്ങ': '0x10078', 'ച്ച': '0x1007d', 'ഞ്ച': '0x100a4', 'ഞ്ഞ': '0x100af', 'ട്ട': '0x100b6', 'ണ്ട': '0x100d6', 'ണ്ണ': '0x100e8', 'ത്ത': '0x100f2', 'ദ്ധ': '0x10132', 'ന്ത': '0x10156', 'ന്ദ': '0x10163', 'ന്ന': '0x10171', 'പ്പ': '0x10194', 'മ്പ': '0x101f9', 'മ്മ': '0x10200', 'യ്യ': '0x1022a', 'ല്ല': '0x10257', 'ള്ള': '0x1030b', 'വ്വ': '0x10263', '്യ': '0x10003', '്ര': '0x10002', '്വ': '0x10006'}
         for i in range(wordNo):
             alpha[str(i)] = {}
         for f in os.listdir(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0])):
             character = str(predict_alphabets(os.path.join(OUTPUT_FOLDER_PNG, filename.split(".")[0], f)))
             alpha[str(f.split("_")[0])][str(f.split("_")[1].split(".")[0])] = character
-            char_filenames[str(character.encode("unicode_escape")).split("\\")[-1].split("\'")[0].replace('u0', '0x')] = f.split(".")[0] + ".svg"
-            subprocess.call(["convert", os.path.join(OUTPUT_FOLDER_PNG_x64, filename.split(".")[0], f), "-negate", os.path.join(OUTPUT_FOLDER_SVG, filename.split(".")[0], f.split(".")[0]+".svg")])
+            if(not(character in hybrid)):
+                char_filenames[str(character.encode("unicode_escape")).split("\\")[-1].split("\'")[0].replace('u0', '0x')] = f.split(".")[0] + ".svg"
+                subprocess.call(["convert", os.path.join(OUTPUT_FOLDER_PNG_x64, filename.split(".")[0], f), "-negate", os.path.join(OUTPUT_FOLDER_SVG, filename.split(".")[0], f.split(".")[0]+".svg")])
+            else:
+                char_filenames[str(hybrid_dict[character])] = f.split(".")[0] + ".svg"
+                subprocess.call(["convert", os.path.join(OUTPUT_FOLDER_PNG_x64, filename.split(".")[0], f), "-negate", os.path.join(OUTPUT_FOLDER_SVG, filename.split(".")[0], f.split(".")[0]+".svg")])
         metadata["glyphs"] = char_filenames
         print(metadata)
         with open(os.path.join(OUTPUT_FOLDER_METADATA, filename.split(".")[0]+str(".json")), 'w') as fp:
