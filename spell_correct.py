@@ -36,14 +36,17 @@ def two_letter_edit(words):
         return word
 
 def candidates(word):
+    candidates = [word]
     if word in vocab:
-        return word
-    for i in single_edit(word):
-        if i in vocab:
-            return i
-    for i in two_letter_edit(word):
-        if i in vocab: 
-            return i       
+        return candidates,len(candidates) == 1
+    else:
+        for i in single_edit(word):
+            if i in vocab:
+                candidates.append(i)
+        for i in two_letter_edit(word):
+            if i in vocab:
+                candidates.append(i)
+        return list(filter(None,candidates)),len(candidates) == 1
 
 def correction(word):
     probable_candidates = candidates(word)

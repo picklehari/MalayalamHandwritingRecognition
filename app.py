@@ -15,6 +15,7 @@ from fastai import *
 from fastai.vision import *
 from fastai.metrics import accuracy
 import json
+import spell_correct
 
 UPLOAD_FOLDER = './uploads'
 OUTPUT_FOLDER_PNG = './output/png'
@@ -269,15 +270,20 @@ def upload_file():
             json.dump(metadata, fp)
         print(char_filenames)
         print(alpha)
-        string = ""
+        sentence = ""
+        words_list = []
         for word in range(0, len(alpha)):
+            string = ""
             for ch in range(len(alpha[str(word)])):
                 string += alpha[str(word)][str(ch)]
-            string += " "
-        print(string)
+            words_list.append(spell_correct.correction(string))
+            sentence += string
+            sentence += " "
+        print(words_list)
+        print(sentence)
         subprocess.call(["./svgs2ttf", str(os.path.join(OUTPUT_FOLDER_METADATA, filename.split(".")[0]+".json"))])
     # return jsonify(character = alpha) 
-    return render_template('result.html', messages={'string': string, 'image': str(filename), 'font': str(filename.split(".")[0])+'.ttf'})
+    return render_template('result.html', messages={'string': sentence, 'image': str(filename), 'font': str(filename.split(".")[0])+'.ttf', 'possible_words': words_list})
 
 @app.route('/upload/<filename>')
 def uploads(filename):
