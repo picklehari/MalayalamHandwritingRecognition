@@ -268,6 +268,8 @@ def upload_file():
                                      filename.split(".")[0]), exist_ok=True)
             os.makedirs(os.path.join(OUTPUT_FOLDER_PNG_x64,
                                      filename.split(".")[0]), exist_ok=True)
+            os.makedirs(os.path.join(OUTPUT_FOLDER_METADATA,
+                                     filename.split(".")[0]), exist_ok=True)
             img = cv2.cvtColor(cv2.imread(os.path.join(
                 UPLOAD_FOLDER, filename)), cv2.COLOR_BGR2RGB)  # input image
             x, wordNo = img_to_seg(img, filename)
@@ -343,4 +345,4 @@ def fonts(filename):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, )
+    app.run(debug=True)
